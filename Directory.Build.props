@@ -1,0 +1,133 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarnOn>3390;$(WarnOn)</WarnOn>
+    <!-- 0.1.0 (2026-08-06): the first version the three projects are packed and consumed
+         at, rather than referenced by project. 0.x pre-1.0 posture: the public surface may
+         still move, and a change to it advances this number IN THE SAME COMMIT — the feed
+         keys packages by id+version, so repacking an unchanged version swaps the contract
+         under every pinned consumer while their extracted caches keep serving the old bits.
+         The three package ids version together: they are one contract cut three ways (the
+         manager, its dialect seam, its execution port), and the seam references the
+         execution tier for the single minting implementation, so a split version would only
+         ever be a lie about which pair was tested against which. See VERSIONING.md.
+
+         0.2.0 (2026-08-06): sibling forests and the cross-sibling invariant seam. The
+         public surface widened in three ways a consumer feels: `ExplorationOp` gained a
+         `Declare` case (an exhaustive match over the op vocabulary stops compiling until it
+         handles it), `SpecState` gained `Divergences` (a record construction stops compiling
+         until it supplies it), and the dialect seam moved to 1.1 with an OPTIONAL seventh
+         obligation. The seam's own version is the separate question VERSIONING.md
+         describes: 1.1 is minor because the new obligation is a separate interface a 1.0
+         dialect declines by simply not implementing it, so no existing dialect breaks.
+         The manager-tier widenings are the reason this is a minor package bump and not a
+         patch.
+
+         0.3.0 (2026-08-06): the vintage evidence axis. The public surface widened in four
+         ways a consumer feels immediately: `ExplorationOp` gained a `Replay` case and
+         `Rejection` gained two (`DuplicateReplay`, `IncompleteReplay`), so an exhaustive
+         match over either stops compiling until it handles them; `Exploration` gained
+         `Replays` and `Forest` gained `Thresholds`, so a record construction stops compiling
+         until it supplies them. `BackendRefusal` and `Rejection` also MOVED file, from
+         `Backend.fs` / `Ops.fs` into `Types.fs` — same names, same namespace, no consumer
+         difference, but recorded here because a reader diffing the tree will see it. The
+         seam tag is unchanged at 1.1: nothing in this release asks a dialect for anything
+         new. Both wire additions are byte-additive and pinned as such.
+
+         0.3.1 (2026-08-06): the `Session.ofJsonl` fold-order fix (DECISIONS D34). A PATCH
+         bump, and deliberately so: no type gained a case, no record gained a field, no
+         signature moved, and no stored byte or node id changes — a history persisted by
+         0.3.0 re-folds under 0.3.1 and re-serialises identically. What changes is only the
+         order in which stored nodes are folded back, which 0.3.0 decided by a content hash
+         and so replayed differently depending on the state ids its author happened to mint.
+         Consumers need no source change; they need the repack, because the defect is in the
+         bits rather than the surface.
+
+         0.4.0 (2026-08-10): multi-party assent — the second quality axis. A MINOR bump, not
+         a patch, and the op vocabulary is why: `ExplorationOp` gained an `Assent` case and
+         `OpKind` gained `AssentKind`, so every exhaustive match over either stops compiling
+         until it handles them — which is the whole point of a closed algebra and the whole
+         cost of extending one. Three more surfaces widen with it: `SpecState` gained
+         `Assents`, `Policy` gained `Parties`, and `Capability` gained `MayAssentAs`, so a
+         record construction or a capability match stops compiling too. The seam tag is
+         unchanged at 1.1: assent asks a dialect for nothing at all — a party class is an
+         opaque declared string exactly as an invariant id is, and no obligation was added.
+
+         Both wire additions are byte-additive by construction and pinned as such: a state
+         with no assents, and a policy declaring no party class, encode to exactly the bytes
+         they did at 0.3.1.
+
+         0.5.0 (2026-08-10): indistinguishability sets — the spec-multiplicity primitive. A
+         MINOR bump, and the reason it is minor rather than a patch is the SIZE of the new
+         surface rather than any break in the old one: seven public types
+         (`IndistinguishabilityScope` / `Declaration` / `Refusal` / `Member` / `Set` /
+         `Report` / `Recurrence` / `ForestView`), the `Indistinguishability` module, thirteen
+         codec pairs on `Wire`, four reads on `Vintage` (`metrics`, `readingOn`,
+         `latestVintage`, `baselineVintage`), `Query.outcomesOn`, and two more laws in
+         `Contract.laws`. `Vintage.wereAlternatives` also moved from private to public,
+         deliberately: the new surface is restricted by exactly that rule and must reach it
+         through the same function rather than a second copy, since two copies of a discipline
+         are two disciplines the moment either is edited.
+
+         Nothing existing changed shape. No type gained a case, no record gained a field, no
+         signature moved, and the op vocabulary is untouched — this release adds no op, because
+         a derived read over the folded record is not an act and does not belong in a history.
+         So an exhaustive match written against 0.4.0 still compiles, which is precisely what
+         makes this additive rather than breaking. The seam tag is unchanged at 1.1:
+         indistinguishability asks a dialect for nothing at all — a metric name is an opaque
+         declared string exactly as an invariant id is.
+
+         The wire additions are new documents rather than new fields on existing ones, so
+         nothing already stored re-encodes differently; the byte pins on the declaration and on
+         the no-declaration report state the new shapes as facts rather than intentions.
+
+         0.5.1 (2026-08-21): the Fuaran.Core pins raised 0.3.0 -> 0.6.0 — the cross-platform
+         FNV-1a parity release (fuaran-core#105's split-half mul32 multiply). A PATCH bump on
+         the 0.3.1 precedent exactly: no type gained a case, no record gained a field, no
+         signature moved, and no stored byte or node id changes — .NET-minted hash values are
+         unchanged, so a history persisted by 0.5.0 re-folds and re-verifies identically. What
+         changes is the packed dependency floor: a consumer restoring 0.5.0 resolves a Core
+         whose chain hash diverges under any JavaScript lowering, which made the manager's
+         cross-host-replay guarantee false for a JS host. Consumers need no source change;
+         they need the repack, because the defect was in the substrate's bits rather than in
+         this surface.
+
+         0.7.0 (2026-10-13): a diagnostic states its unit (DECISIONS D39). A MINOR bump, and
+         the record fields are why: `OutcomeSnapshot` gained `DiagnosticUnits`, `GateRequest`
+         and `GateVerdict` gained `Unit`, and on the execution tier the mirror's `FitOutcome`,
+         `Gate`, `GateVerdict` and `ReferenceExecutorConfig` gained the same — so every
+         full-literal construction stops compiling until it supplies them (FS0764). Three
+         closed unions widened with them, so an exhaustive match stops compiling too:
+         `BackendRefusal` gained `GateUnitMismatch`, the mirror's `Refusal` gained the
+         specification's new `gateUnitMismatch` class, and `Rejection` gained
+         `HistoryCollision`. `Bridge.toManagerVerdict` and `toManagerOutcome` now return a
+         `Result`, because a unit that is not unit text is refused rather than dropped.
+         0.6.0 is tagged, so this advances rather than riding it.
+
+         The Fuaran.Core pins moved 0.20.0 -> 0.37.0 in the same release, because
+         `Fuaran.Core.Unit` first ships at 0.37.0 and the family moves as one version. Every
+         wire byte the manager wrote at 0.6.0 is unchanged — an outcome, gate or policy that
+         states no unit encodes to exactly the bytes it did, which the contract pack's byte
+         pins assert. The seam tag is unchanged at 1.1: a unit is a value attached to a name
+         a dialect already chose, and nothing new is asked of a dialect.
+
+         0.7.0 is untagged and no published consumer pins it, so it is still a draft, and the
+         Fuaran.Core pins moving 0.37.0 -> 0.41.0 (DECISIONS D41) ride it rather than advance it:
+         no type gained a case, no record gained a field, no signature moved and no stored byte
+         changes. What moves is the packed dependency floor, which the first tagged release states
+         once. -->
+    <Version>0.7.0</Version>
+    <!-- Every package this repository depends on restores from nuget.org (nuget.config), so a pin
+         must name a tagged, published version. -->
+    <FuaranRestorePath>public</FuaranRestorePath>
+    <Authors>Andrew J. Willshire</Authors>
+    <Company>Diametrical Ltd</Company>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <Copyright>Copyright 2026 Diametrical Ltd</Copyright>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageProjectUrl>https://github.com/Fuaran-Data/Fuaran-Modelling</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Fuaran-Data/Fuaran-Modelling</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+</Project>

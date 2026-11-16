@@ -1,0 +1,48 @@
+<Project>
+  <PropertyGroup>
+    <!-- One property for the Fuaran.Core.* family: the four packages below move as one version,
+         and a pin that names it once cannot leave one of them behind. The version is a tagged,
+         published release, so every package here restores from nuget.org and nowhere else. -->
+    <FuaranCoreVersion>0.41.0</FuaranCoreVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Fuaran.Modelling is FSharp.Core-only at runtime beyond the Fuaran.Core.* substrate;
+         Expecto is test-only. No estimator, no framework, no host dependency — ever. -->
+    <PackageVersion Include="FSharp.Core" Version="10.1.300" />
+    <PackageVersion Include="Expecto" Version="9.0.4" />
+    <!-- Fuaran.Core substrate. The manager is composition over shipped Core machinery, not new
+         core design: the branching content-addressed op-DAG (OpStream.Dag), its stream witness
+         (OpStream), and the canonical Wire JSON discipline (Wire). Ops arrives transitively as
+         OpStream.Dag's footprint-address dependency.
+
+         0.6.0 is the cross-platform FNV-1a parity release (the split-half mul32 multiply;
+         tagged and published to nuget.org 2026-08-21). The manager's chain hash is Core's
+         `OpStream.defaultHash`, and below 0.6.0 its value diverged under any JavaScript
+         lowering (the naive multiply overflows 2^53 in JS doubles) — so a consumer promising
+         byte-for-byte cross-host replay was promising something the substrate did not hold.
+         .NET-minted values are unchanged, so every persisted history re-folds and re-verifies
+         identically; the raise moves the packed dependency floor and nothing else.
+
+         0.37.0 (2026-10-13, D39): raised for `Fuaran.Core.Unit` below, which first ships
+         there. Crossing 0.37.0's removals cost three things, each a row of Core's migration
+         table: the string-error `Decode.*` readers became local one-line wrappers over the
+         typed `Decoder`, `Dag.append`/`merge` now refuse a content-id collision rather than
+         replacing the node (the manager surfaces it as `Rejection.HistoryCollision`), and the
+         JSONL loader's fault is typed (`Dag.loadFaultToString` keeps the old text).
+
+         0.41.0 (2026-11-16, D41): the line the published compute packages build on, so a
+         package that pins both resolves one Core. Crossing 0.38.0 to 0.41.0 cost two things:
+         a DAG write takes a `Stream` (the hash and the witness declared together,
+         `OpStream.canonical`) and answers a `Written` record, and `Canon.render` / `Canon.typed`
+         are `Canonical.write Rendering.CrossHost` / `Canonical.typed`. No byte the manager
+         writes moved, which the contract pack's byte pins and the conformance corpus assert. -->
+    <PackageVersion Include="Fuaran.Core.OpStream" Version="$(FuaranCoreVersion)" />
+    <PackageVersion Include="Fuaran.Core.OpStream.Dag" Version="$(FuaranCoreVersion)" />
+    <PackageVersion Include="Fuaran.Core.Wire" Version="$(FuaranCoreVersion)" />
+    <!-- The unit algebra (D39): the one package that gives a consumer units without columns,
+         FSharp.Core-only, so the manager's dependency rule (Core and nothing else) holds. It
+         first ships at 0.37.0, which is why the three pins above moved with it — one version
+         for the family. -->
+    <PackageVersion Include="Fuaran.Core.Unit" Version="$(FuaranCoreVersion)" />
+  </ItemGroup>
+</Project>

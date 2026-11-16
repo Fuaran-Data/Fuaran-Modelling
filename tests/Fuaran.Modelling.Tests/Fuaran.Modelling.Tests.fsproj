@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Sample.fs" />
+    <Compile Include="ReducerTests.fs" />
+    <Compile Include="PolicyTests.fs" />
+    <Compile Include="WireTests.fs" />
+    <Compile Include="SessionTests.fs" />
+    <Compile Include="BackendTests.fs" />
+    <Compile Include="ExplorationScenarioTests.fs" />
+    <Compile Include="ForestTests.fs" />
+    <Compile Include="VintageTests.fs" />
+    <Compile Include="AssentTests.fs" />
+    <Compile Include="IndistinguishabilityTests.fs" />
+    <Compile Include="SeriesUnitTests.fs" />
+    <!-- The consensual axis needs only the manager tier, so the story follows its parts
+         directly rather than waiting on the seam or the port. -->
+    <Compile Include="AssentScenarioTests.fs" />
+    <!-- Same for the multiplicity story: it is a read over a folded record, so it needs no
+         dialect behind it and no executor. -->
+    <Compile Include="IndistinguishabilityScenarioTests.fs" />
+    <Compile Include="ContractTests.fs" />
+    <Compile Include="CorpusFixtures.fs" />
+    <!-- Follows CorpusFixtures only to reuse its repo-root walk for the persisted fixture. -->
+    <Compile Include="FoldOrderTests.fs" />
+    <Compile Include="DialectSeamTests.fs" />
+    <Compile Include="ConformanceCorpusTests.fs" />
+    <!-- The three-sibling story needs a real dialect behind it, so it follows the seam. -->
+    <Compile Include="ForestScenarioTests.fs" />
+    <Compile Include="SpecCorpus.fs" />
+    <Compile Include="ExecutionPortTests.fs" />
+    <Compile Include="ExecutionCorpusTests.fs" />
+    <!-- The Rung-3 story needs the port behind it, so it follows the execution tier. -->
+    <Compile Include="VintageScenarioTests.fs" />
+    <Compile Include="MintingGenerator.fs" />
+    <Compile Include="MintingAgreementTests.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Fuaran.Modelling\Fuaran.Modelling.fsproj" />
+    <ProjectReference Include="..\..\src\Fuaran.Modelling.DialectSeam\Fuaran.Modelling.DialectSeam.fsproj" />
+    <ProjectReference Include="..\..\src\Fuaran.Modelling.Execution\Fuaran.Modelling.Execution.fsproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="FSharp.Core" />
+    <PackageReference Include="Expecto" />
+    <PackageReference Include="Fuaran.Core.OpStream" />
+    <PackageReference Include="Fuaran.Core.OpStream.Dag" />
+    <PackageReference Include="Fuaran.Core.Wire" />
+  </ItemGroup>
+</Project>

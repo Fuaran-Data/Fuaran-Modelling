@@ -1,0 +1,336 @@
+{
+  "corpus": "dialect-conformance",
+  "corpusVersion": 1,
+  "dialect": "reference-linear",
+  "gates": [
+    {
+      "direction": "atLeast",
+      "name": "termCount",
+      "threshold": 1
+    },
+    {
+      "direction": "atMost",
+      "name": "residualScale",
+      "threshold": 1
+    }
+  ],
+  "importer": [
+    {
+      "name": "clean-document",
+      "residue": [],
+      "roundTrip": true,
+      "source": "{\"response\":\"y\",\"terms\":[{\"name\":\"x\"}]}"
+    },
+    {
+      "name": "foreign-document",
+      "residue": [
+        {
+          "path": "/",
+          "term": "tool"
+        },
+        {
+          "path": "/",
+          "term": "notes"
+        },
+        {
+          "path": "/terms/0/transform",
+          "term": "seasonalWindow"
+        },
+        {
+          "path": "/terms/0",
+          "term": "prior"
+        }
+      ],
+      "roundTrip": true,
+      "source": "{\"response\":\"y\",\"tool\":\"another-authoring-surface\",\"terms\":[{\"name\":\"x\",\"transform\":{\"$type\":\"seasonalWindow\",\"width\":7},\"prior\":\"wide\"}],\"notes\":\"exported from elsewhere\"}"
+    },
+    {
+      "name": "already-canonical",
+      "residue": [],
+      "roundTrip": true,
+      "source": "{\"intercept\":false,\"response\":\"sales\",\"terms\":[{\"name\":\"price\",\"transform\":{\"$type\":\"log\"}},{\"bound\":{\"lower\":0,\"upper\":1},\"name\":\"promo\",\"transform\":{\"$type\":\"lag\",\"periods\":2}},{\"name\":\"trend\",\"transform\":{\"$type\":\"identity\"}}]}"
+    }
+  ],
+  "invariants": [
+    {
+      "findings": [],
+      "name": "siblings-agree",
+      "siblings": [
+        {
+          "sibling": "unit-a",
+          "source": "{\"response\":\"y\",\"terms\":[{\"name\":\"shared\",\"transform\":{\"$type\":\"log\"}},{\"name\":\"local-a\"}]}",
+          "state": "s1"
+        },
+        {
+          "sibling": "unit-b",
+          "source": "{\"response\":\"y\",\"terms\":[{\"name\":\"shared\",\"transform\":{\"$type\":\"log\"}},{\"name\":\"local-b\"}]}",
+          "state": "s1"
+        }
+      ]
+    },
+    {
+      "findings": [
+        {
+          "invariantId": "REF-TRANSFORM-CONSISTENT",
+          "siblings": [
+            "unit-a",
+            "unit-b",
+            "unit-c"
+          ]
+        }
+      ],
+      "name": "one-sibling-transforms-a-shared-term-differently",
+      "siblings": [
+        {
+          "sibling": "unit-a",
+          "source": "{\"response\":\"y\",\"terms\":[{\"name\":\"shared\",\"transform\":{\"$type\":\"log\"}},{\"name\":\"local-a\"}]}",
+          "state": "s1"
+        },
+        {
+          "sibling": "unit-b",
+          "source": "{\"response\":\"y\",\"terms\":[{\"name\":\"shared\",\"transform\":{\"$type\":\"log\"}},{\"name\":\"local-b\"}]}",
+          "state": "s1"
+        },
+        {
+          "sibling": "unit-c",
+          "source": "{\"response\":\"y\",\"terms\":[{\"name\":\"shared\",\"transform\":{\"$type\":\"lag\",\"periods\":1}}]}",
+          "state": "s1"
+        }
+      ]
+    },
+    {
+      "findings": [
+        {
+          "invariantId": "REF-TRANSFORM-CONSISTENT",
+          "siblings": [
+            "unit-a",
+            "unit-b"
+          ]
+        }
+      ],
+      "name": "a-term-in-one-sibling-only-is-not-a-disagreement",
+      "siblings": [
+        {
+          "sibling": "unit-a",
+          "source": "{\"response\":\"y\",\"terms\":[{\"name\":\"shared\",\"transform\":{\"$type\":\"log\"}},{\"name\":\"local-a\"}]}",
+          "state": "s1"
+        },
+        {
+          "sibling": "unit-b",
+          "source": "{\"response\":\"y\",\"terms\":[{\"name\":\"shared\",\"transform\":{\"$type\":\"lag\",\"periods\":1}}]}",
+          "state": "s1"
+        }
+      ]
+    }
+  ],
+  "packs": [
+    {
+      "expect": {
+        "$type": "applied",
+        "bytes": "{\"intercept\":true,\"response\":\"y\",\"terms\":[{\"bound\":{\"lower\":0,\"upper\":2},\"name\":\"x1\",\"transform\":{\"$type\":\"identity\"}},{\"name\":\"x2\",\"transform\":{\"$type\":\"identity\"}}]}"
+      },
+      "name": "bounds-applied",
+      "pack": {
+        "body": "{\"bounds\":{\"x1\":{\"lower\":0,\"upper\":2}}}",
+        "id": "bounds-1",
+        "kind": "bounds",
+        "version": "1"
+      },
+      "source": "{\"response\":\"y\",\"terms\":[{\"name\":\"x1\"},{\"name\":\"x2\"}]}"
+    },
+    {
+      "expect": {
+        "$type": "applied",
+        "bytes": "{\"intercept\":true,\"response\":\"y\",\"terms\":[{\"name\":\"x1\",\"transform\":{\"$type\":\"identity\"}},{\"name\":\"x2\",\"transform\":{\"$type\":\"lag\",\"periods\":3}}]}"
+      },
+      "name": "transforms-applied",
+      "pack": {
+        "body": "{\"transforms\":{\"x2\":{\"$type\":\"lag\",\"periods\":3}}}",
+        "id": "transforms-1",
+        "kind": "transforms",
+        "version": "1"
+      },
+      "source": "{\"response\":\"y\",\"terms\":[{\"name\":\"x1\"},{\"name\":\"x2\"}]}"
+    },
+    {
+      "expect": {
+        "$type": "refused",
+        "refusal": "unknownKind"
+      },
+      "name": "undeclared-kind",
+      "pack": {
+        "body": "{}",
+        "id": "hierarchy-1",
+        "kind": "hierarchy",
+        "version": "1"
+      },
+      "source": "{\"response\":\"y\",\"terms\":[{\"name\":\"x1\"},{\"name\":\"x2\"}]}"
+    },
+    {
+      "expect": {
+        "$type": "refused",
+        "refusal": "conflicts"
+      },
+      "name": "bounds-for-a-term-that-is-not-there",
+      "pack": {
+        "body": "{\"bounds\":{\"absent\":{\"lower\":0,\"upper\":1}}}",
+        "id": "bounds-2",
+        "kind": "bounds",
+        "version": "1"
+      },
+      "source": "{\"response\":\"y\",\"terms\":[{\"name\":\"x1\"},{\"name\":\"x2\"}]}"
+    },
+    {
+      "expect": {
+        "$type": "refused",
+        "refusal": "malformed"
+      },
+      "name": "malformed-body",
+      "pack": {
+        "body": "{\"not-bounds\":{}}",
+        "id": "bounds-3",
+        "kind": "bounds",
+        "version": "1"
+      },
+      "source": "{\"response\":\"y\",\"terms\":[{\"name\":\"x1\"},{\"name\":\"x2\"}]}"
+    }
+  ],
+  "projector": [
+    {
+      "bytes": "{\"intercept\":true,\"response\":\"y\",\"terms\":[{\"name\":\"x\",\"transform\":{\"$type\":\"identity\"}}]}",
+      "covers": [
+        "response",
+        "term",
+        "transform:identity"
+      ],
+      "hash": "sha256:b1a55267ef8149a517cf390a8834db298b073ba2b2bef4e1a2a1e5817cbf42f1",
+      "name": "minimal",
+      "source": "{\"response\":\"y\",\"terms\":[{\"name\":\"x\"}]}"
+    },
+    {
+      "bytes": "{\"intercept\":true,\"response\":\"y\",\"terms\":[{\"name\":\"x\",\"transform\":{\"$type\":\"identity\"}}]}",
+      "covers": [
+        "response",
+        "term"
+      ],
+      "hash": "sha256:b1a55267ef8149a517cf390a8834db298b073ba2b2bef4e1a2a1e5817cbf42f1",
+      "name": "authoring-order-permuted",
+      "source": "{ \"terms\" : [ { \"name\" : \"x\" } ] , \"response\" : \"y\" }"
+    },
+    {
+      "bytes": "{\"intercept\":false,\"response\":\"sales\",\"terms\":[{\"name\":\"price\",\"transform\":{\"$type\":\"log\"}},{\"bound\":{\"lower\":0,\"upper\":1},\"name\":\"promo\",\"transform\":{\"$type\":\"lag\",\"periods\":2}},{\"name\":\"trend\",\"transform\":{\"$type\":\"identity\"}}]}",
+      "covers": [
+        "response",
+        "intercept",
+        "term",
+        "transform:log",
+        "transform:lag",
+        "bound"
+      ],
+      "hash": "sha256:645632f1e9f957215f7b7df23019597ccb1a077a9e6df62aaac21a240f102021",
+      "name": "every-modelled-term",
+      "source": "{\"response\":\"sales\",\"intercept\":false,\"terms\":[{\"name\":\"price\",\"transform\":{\"$type\":\"log\"}},{\"name\":\"promo\",\"transform\":{\"$type\":\"lag\",\"periods\":2},\"bound\":{\"lower\":0,\"upper\":1}},{\"name\":\"trend\"}]}"
+    }
+  ],
+  "seamVersion": "1.1",
+  "validator": [
+    {
+      "findings": [],
+      "name": "clean",
+      "projects": true,
+      "source": "{\"response\":\"y\",\"terms\":[{\"name\":\"x\"}]}"
+    },
+    {
+      "findings": [
+        {
+          "code": "REF-NO-INTERCEPT",
+          "severity": "advisory"
+        }
+      ],
+      "name": "advisory-does-not-block",
+      "projects": true,
+      "source": "{\"response\":\"y\",\"intercept\":false,\"terms\":[{\"name\":\"x\"}]}"
+    },
+    {
+      "findings": [
+        {
+          "code": "REF-NO-TERMS",
+          "severity": "blocking"
+        }
+      ],
+      "name": "no-terms",
+      "projects": false,
+      "source": "{\"response\":\"y\",\"terms\":[]}"
+    },
+    {
+      "findings": [
+        {
+          "code": "REF-RESPONSE-EMPTY",
+          "severity": "blocking"
+        }
+      ],
+      "name": "empty-response",
+      "projects": false,
+      "source": "{\"response\":\"\",\"terms\":[{\"name\":\"x\"}]}"
+    },
+    {
+      "findings": [
+        {
+          "code": "REF-DUPLICATE-TERM",
+          "severity": "blocking"
+        }
+      ],
+      "name": "duplicate-term",
+      "projects": false,
+      "source": "{\"response\":\"y\",\"terms\":[{\"name\":\"x\"},{\"name\":\"x\"}]}"
+    },
+    {
+      "findings": [
+        {
+          "code": "REF-TERM-IS-RESPONSE",
+          "severity": "blocking"
+        }
+      ],
+      "name": "term-names-the-response",
+      "projects": false,
+      "source": "{\"response\":\"y\",\"terms\":[{\"name\":\"y\"}]}"
+    },
+    {
+      "findings": [
+        {
+          "code": "REF-LAG-NEGATIVE",
+          "severity": "blocking"
+        }
+      ],
+      "name": "negative-lag",
+      "projects": false,
+      "source": "{\"response\":\"y\",\"terms\":[{\"name\":\"x\",\"transform\":{\"$type\":\"lag\",\"periods\":-1}}]}"
+    },
+    {
+      "findings": [
+        {
+          "code": "REF-BOUND-INVERTED",
+          "severity": "blocking"
+        }
+      ],
+      "name": "inverted-bound",
+      "projects": false,
+      "source": "{\"response\":\"y\",\"terms\":[{\"name\":\"x\",\"bound\":{\"lower\":1,\"upper\":0}}]}"
+    },
+    {
+      "findings": [
+        {
+          "code": "REF-DUPLICATE-TERM",
+          "severity": "blocking"
+        },
+        {
+          "code": "REF-NO-INTERCEPT",
+          "severity": "advisory"
+        }
+      ],
+      "name": "several-findings-at-once",
+      "projects": false,
+      "source": "{\"response\":\"y\",\"intercept\":false,\"terms\":[{\"name\":\"x\"},{\"name\":\"x\"}]}"
+    }
+  ]
+}

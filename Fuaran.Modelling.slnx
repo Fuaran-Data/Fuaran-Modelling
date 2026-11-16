@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Fuaran.Modelling/Fuaran.Modelling.fsproj" />
+    <Project Path="src/Fuaran.Modelling.DialectSeam/Fuaran.Modelling.DialectSeam.fsproj" />
+    <Project Path="src/Fuaran.Modelling.Execution/Fuaran.Modelling.Execution.fsproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Fuaran.Modelling.Tests/Fuaran.Modelling.Tests.fsproj" />
+  </Folder>
+</Solution>

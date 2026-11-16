@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>true</IsPackable>
+    <PackageId>Fuaran.Modelling.DialectSeam</PackageId>
+    <Description>The dialect seam of Fuaran.Modelling — the public extension point behind which all model vocabulary lives. Six obligations as one typed interface (spec-tree types, validators, a projector rendering the tree to canonical payload bytes, a parse-back importer with a residue report, a default gate vocabulary on the generic (name, threshold, direction) triple, and a pack schema), an executable conformance corpus with stable failure codes, a versioned seam whose skew is a typed refusal, and a trivial reference dialect that binds the contract. The default spec-hash minting rule is the registered canonical-json-sha256-v1, taken from the execution tier rather than reimplemented here, so one identifier never names two rules. FSharp.Core plus the Fuaran.Core substrate; no estimator, no numerical method.</Description>
+    <PackageTags>modelling;dialect;seam;conformance;projection;governance;fsharp</PackageTags>
+    <!-- The seam's enumerations are closed on purpose; a missing case is a runtime throw in
+         the one place a caller was promised a total answer. -->
+    <WarningsAsErrors>FS0025;$(WarningsAsErrors)</WarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Seam.fs" />
+    <Compile Include="Conformance.fs" />
+    <Compile Include="Reference.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\LICENSE" Pack="true" PackagePath="\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Fuaran.Modelling\Fuaran.Modelling.fsproj" />
+    <!-- For the ONE implementation of the registered `canonical-json-sha256-v1` minting
+         rule (D25). The direction is deliberate and one-way: the mirror knows nothing of
+         the seam, so the tier that owns the wire's rules stays the tier that states them. -->
+    <ProjectReference Include="..\Fuaran.Modelling.Execution\Fuaran.Modelling.Execution.fsproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="FSharp.Core" />
+    <PackageReference Include="Fuaran.Core.OpStream" />
+    <PackageReference Include="Fuaran.Core.Wire" />
+  </ItemGroup>
+</Project>

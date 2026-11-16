@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>true</IsPackable>
+    <PackageId>Fuaran.Modelling.Execution</PackageId>
+    <Description>The execution-backend port of Fuaran.Modelling — the manager's entire backend-facing surface as one interface (submit fits, read outcomes, resolve a vintage, score, query artifacts, request a re-vintage), every operation returning a typed refusal in the error channel. Its types are FSharp.Core-only records mirroring a language-neutral model-execution wire specification field for field, with a canonical codec (declaration-ordered records, sorted maps, sign-prefixed 64-bit integers, ECMAScript real numbers), the submitter-side minting canonicalisation, a drift-conformance harness that fails the build when the specification moves, and a deterministic in-memory reference executor that is explicitly not statistics.</Description>
+    <PackageTags>modelling;execution;port;wire-format;conformance;governance;fsharp</PackageTags>
+    <!-- The refusal vocabularies and the document kinds are closed on purpose; a missing
+         case is a runtime throw in the one place a caller was promised a total answer. -->
+    <WarningsAsErrors>FS0025;$(WarningsAsErrors)</WarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- The mirror tier: FSharp.Core and the BCL only. Nothing here opens Fuaran.Core,
+         and a test asserts as much — a mirror that borrows another wire model's
+         conventions is a translation, and translations drift silently. -->
+    <Compile Include="Mirror.fs" />
+    <Compile Include="Canonical.fs" />
+    <Compile Include="Codec.fs" />
+    <Compile Include="Port.fs" />
+    <Compile Include="Reference.fs" />
+    <Compile Include="Conformance.fs" />
+    <!-- The one file that knows the manager exists. -->
+    <Compile Include="Bridge.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\LICENSE" Pack="true" PackagePath="\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Fuaran.Modelling\Fuaran.Modelling.fsproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="FSharp.Core" />
+    <PackageReference Include="Fuaran.Core.OpStream" />
+    <PackageReference Include="Fuaran.Core.OpStream.Dag" />
+    <PackageReference Include="Fuaran.Core.Unit" />
+  </ItemGroup>
+</Project>

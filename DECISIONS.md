@@ -1083,3 +1083,60 @@ pipeline hashes owns that check, with an encoder behind it.
 `Registry.mintingAlgorithms` gains the identifier, and the manifest pin moves to the corpus that
 carries the new vectors. No type gained a case, no record gained a field and no signature moved,
 so this is a patch: 0.7.1, a draft, because 0.7.0 is released (`VERSIONING.md`).
+
+## D45 — The Compute dialect ships here, Compute enters through it alone, and its spec hash is the pipeline hash
+
+`Fuaran.Modelling.Compute` is a dialect whose specification is a Fuaran.Compute fit: the transform
+pipeline that prepares the regressors, ending in one `Fit` step. It is the first dialect in this
+repository that is not there to bind the seam, and four rulings shape it.
+
+**Its home is this repository, as a fourth package.** This library owns the dialect seam and the
+conformance pack a dialect is judged by, and Compute should not learn that a model manager exists.
+Both are public substrate, so either direction of dependency was open; the one taken keeps the seam,
+its pack and its first real dialect certified in one gate.
+
+**Compute enters through this package and nowhere else.** `Fuaran.Modelling`, the seam and the
+execution tier stay Core-only, so a consumer that never fits a Compute model never restores Compute.
+The Compute pins are one property, `FuaranComputeVersion`, beside `FuaranCoreVersion` (one version
+property per producing repository); the version named is a published release built on the Core line
+this repository pins, so the two families resolve one Core. A test reads the built assemblies'
+references rather than the project files, so a reference that arrives transitively is caught too.
+
+**The projector is Compute's canonical pipeline document, so the spec hash IS the pipeline hash.**
+The payload is `DataFrameCodec.encodePipeline` of the regressors followed by the fit, and the hash
+is Compute's own `pipelineHash` of that pipeline in the wire's content-address form, minted under the
+registered `compute-pipeline-sha256-v1` (D44). A registry that keys a fitted model by its pipeline hash
+and a decision record that keys a branch state by its spec hash then name one object with one string.
+A law test holds the equality byte for byte three ways: against Compute's function, against the
+digests the model-execution specification's corpus records for the pipelines it imports, and through
+the execution wire's composite-key codec. `Mint` is defined on canonical pipeline documents only and
+gives anything else a `raw:` address, which is the pre-emit check D44 left to a dialect with an
+encoder behind it. A pipeline the specification's corpus carries with steps newer than the pinned
+Compute decodes nowhere here, and mints `raw:` rather than a hash this dialect cannot vouch for.
+
+**Everything it knows about regression is Compute's.** Its validators are Compute's wire (a
+specification its codec would not read back is refused), Compute's static schema walk (a column the
+fit reads that the walk proves absent, a response it proves non-numeric) and the refusals Compute's
+`Fit` states before reading a row. Its default gates are the fit's failure modes on the generic
+triple: `notConverged`, which Compute refuses by name, and `rankDeficient`, which it does not — the
+pinned Compute fits an aliased design, leaves the aliased term without an estimate and states the
+rank it reached, so the gate reads that statement. An executor reports both from what Compute
+answered (`ComputeDialect.Observe`).
+
+Two inputs are a deployment's to declare and have no default here, on the reasoning D33 gives for
+thresholds: the dataset's schema, which closes the walk, and a minimum history, which adds the `n` gate.
+A number invented here would read as a standard.
+
+The importer reads any Compute pipeline that contains a fit. The last fit is the model, and an earlier
+one is regressor preparation. Steps after the model, and members the codec passed over, are residue.
+
+**The indistinguishability-set query lives with the dialect** (`Multiplicity.memberKeys`). A party
+re-scoring a declared set to show the range across it needs each member's composite key, and only a
+member fitted under this dialect carries a pipeline hash. A member written in another dialect is
+named, never dropped, because a range over only the re-scorable members would report a narrower
+family than the record holds. With no declaration the answer is `None`, never an empty list.
+
+What this does not do: the model-execution specification carries no branch-state reference, no
+liveness, no assent record and no set membership, so a consumer reading a decision record over the
+wire cannot yet resolve a composite key to a branch. That belongs to the specification and its
+corpus, under their own rules, and is not moved here.

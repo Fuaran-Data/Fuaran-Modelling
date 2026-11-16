@@ -1,9 +1,10 @@
 # Versioning
 
-`Fuaran.Modelling`, `Fuaran.Modelling.DialectSeam` and `Fuaran.Modelling.Execution` ship as three
-packages at **one version**, set once in [`Directory.Build.props`](Directory.Build.props).
+`Fuaran.Modelling`, `Fuaran.Modelling.DialectSeam`, `Fuaran.Modelling.Execution` and, from 0.8.0,
+`Fuaran.Modelling.Compute` ship as four packages at **one version**, set once in
+[`Directory.Build.props`](Directory.Build.props).
 
-## One version for three packages
+## One version for four packages
 
 They are one contract cut three ways — the manager spine, the extension point in front of it, the
 port behind it — and the seam takes a reference on the execution tier so that the registered
@@ -11,6 +12,12 @@ port behind it — and the seam takes a reference on the execution tier so that 
 independently would produce combinations nobody built or tested, and the failure mode of a wrong
 combination is a spec hash that means two different things to two parties who cannot check it.
 So they move together, always.
+
+The fourth package, the Compute dialect, joins the same version for the same reason: it implements the
+seam, and a dialect certified against one build of the seam's conformance pack and published beside
+another is a combination nobody tested. It is the only package here with a second producer behind it,
+so its Compute pin is a separate property (`FuaranComputeVersion`) and moves on its own terms
+([D45](DECISIONS.md#d45--the-compute-dialect-ships-here-compute-enters-through-it-alone-and-its-spec-hash-is-the-pipeline-hash)).
 
 ## 0.x posture
 
@@ -119,6 +126,17 @@ The same release moved the `Fuaran.Core` pins from 0.20.0 to 0.37.0, because the
 ships there and the family moves as one version. That raise crossed Core's 0.37.0 removals; each cost
 one row of Core's migration table, and none moved a byte the manager writes.
 
+0.8.0 is a draft, opened for a fourth package and for widenings of the manager tier, and the first of
+its additions is the package itself: `Fuaran.Modelling.Compute`, the Compute dialect
+([D45](DECISIONS.md#d45--the-compute-dialect-ships-here-compute-enters-through-it-alone-and-its-spec-hash-is-the-pipeline-hash)).
+It is a new package id, so nothing existing changes shape: no type of the three existing packages
+gained a case or a field, no signature moved, and no byte any of them writes changed. What a consumer
+of the other three feels is nothing; what a consumer of the new one takes on is the `Fuaran.Compute.*`
+packages at `FuaranComputeVersion`, which none of the other three references. The seam tag is
+unchanged at 1.1: the Compute dialect implements the six obligations as they stand and declines the
+optional seventh. The new corpus, `conformance/compute-fit.json`, is a second document in the existing
+format at the existing `corpusVersion`.
+
 ## 1.0
 
 1.0 is a statement that the surfaces above will only grow within a major version. It is not implied
@@ -126,8 +144,12 @@ by the library working.
 
 ## Publishing
 
-`pwsh ./pack-all.ps1` packs all three at the current version into a local folder feed
+`pwsh ./pack-all.ps1` packs all four at the current version into a local folder feed
 (`-Feed <path>` to choose one). Release publication is a separate, deliberate act: a `v*` tag that
 names the `<Version>` in `Directory.Build.props`. The publish workflow refuses a tag that disagrees,
-sweeps the publication boundary over the head and the history, runs the gate, packs the three
+sweeps the publication boundary over the head and the history, runs the gate, packs the four
 packages as one version and pushes them to nuget.org. A push to a branch publishes nothing.
+
+A new package id is a new registry entry. Trusted Publishing's policy names a package glob, so the
+fourth id is covered by the policy that covers the other three only if that glob is
+`Fuaran.Modelling.*`; confirm it before the first tag that carries it.

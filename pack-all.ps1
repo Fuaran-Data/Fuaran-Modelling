@@ -1,17 +1,19 @@
 <#
 .SYNOPSIS
-    Pack the three Fuaran.Modelling packages into a local folder feed.
+    Pack the four Fuaran.Modelling packages into a local folder feed.
 .DESCRIPTION
     The inner-loop distribution channel. A consumer that takes this library by
     PackageReference — rather than by project reference inside this repo —
     restores it from a local folder feed, so the packages are produced here and
     dropped there.
 
-    Three packages, packed together at one version (see VERSIONING.md): the
-    manager spine, the dialect seam, and the execution-backend port. They are
-    one contract cut three ways, and the seam depends on the execution tier for
-    the single implementation of the registered minting rule, so a split version
-    would only ever be a lie about which pair was tested against which.
+    Four packages, packed together at one version (see VERSIONING.md): the
+    manager spine, the dialect seam, the execution-backend port, and the Compute
+    dialect. The first three are one contract cut three ways, and the seam
+    depends on the execution tier for the single implementation of the registered
+    minting rule; the fourth implements the seam and is certified against this
+    build of its conformance pack. A split version would only ever be a lie about
+    which pair was tested against which.
 
     Packing at an UNCHANGED version overwrites the feed slot in place, swapping
     the contract under every consumer pinned to it while their extracted NuGet
@@ -26,7 +28,7 @@
     Build configuration to pack. Release by default.
 .EXAMPLE
     pwsh ./pack-all.ps1
-    Pack all three at the current version into the default feed.
+    Pack all four at the current version into the default feed.
 .EXAMPLE
     pwsh ./pack-all.ps1 -Feed C:\feeds\local
     Pack into an explicit folder feed.
@@ -53,6 +55,7 @@ $producers = @(
     'src\Fuaran.Modelling\Fuaran.Modelling.fsproj'
     'src\Fuaran.Modelling.Execution\Fuaran.Modelling.Execution.fsproj'
     'src\Fuaran.Modelling.DialectSeam\Fuaran.Modelling.DialectSeam.fsproj'
+    'src\Fuaran.Modelling.Compute\Fuaran.Modelling.Compute.fsproj'
 )
 
 foreach ($proj in $producers) {

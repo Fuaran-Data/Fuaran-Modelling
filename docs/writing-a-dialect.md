@@ -14,6 +14,11 @@ The worked example is `ReferenceDialect` in
 It is deliberately trivial and deliberately not statistics — it exists to bind the contract, not to
 be used. Read it alongside this page.
 
+The worked NON-trivial example is the Compute dialect, `Fuaran.Modelling.Compute`, whose specification
+is a regression fitted by Fuaran.Compute. It is what the obligations look like when the vocabulary
+belongs to somebody else; [its section below](#a-worked-non-trivial-example--the-compute-dialect)
+walks through it.
+
 ## What a dialect owns, and what it must not
 
 | | |
@@ -313,6 +318,45 @@ contract nobody implements.
 `Id` and `PayloadFormat` are the two strings the manager already carries on every payload. A payload
 whose tags disagree with its dialect's identity is unattributable the moment it is stored, so the
 harness treats the disagreement as a failure rather than a style note.
+
+## A worked non-trivial example — the Compute dialect
+
+[`src/Fuaran.Modelling.Compute/`](../src/Fuaran.Modelling.Compute/) is a dialect over a vocabulary it
+does not own. Its specification is a Fuaran.Compute fit: the transform pipeline that prepares the
+regressors, ending in one `Fit` step. Compute owns the families, the links, the iteration control and
+every refusal; the dialect restates none of them. Each obligation, read against it:
+
+| Obligation | How the Compute dialect meets it |
+|---|---|
+| Spec tree | `ComputeSpec = { Regressors: Transform list; Fit: FitSpec }`: Compute's own types, unwrapped. The vocabulary it publishes is the tree's members (`regressors`, `response`, `predictor`, `ridge`, …), not Compute's verbs. |
+| Validators | three sources, none of them the dialect's opinion: Compute's wire (a specification its codec would not read back is refused), Compute's static schema walk (a column the walk proves absent, a response it proves non-numeric), and the refusals Compute's `Fit` states before reading a row. |
+| Projector and hash | Compute's canonical pipeline document, so the spec hash is Compute's pipeline hash under the registered `compute-pipeline-sha256-v1`. `Mint` is defined on canonical pipeline documents and gives anything else a `raw:` address. |
+| Importer | any pipeline containing a fit; the last fit is the model. Steps after it, and members Compute's codec passed over, are residue. |
+| Gates | the fit's failure modes on the generic triple: `rankDeficient` and `notConverged`, observed from what Compute answered (`ComputeDialect.Observe`). |
+| Packs | `control` and `ridge`: an iteration budget or a penalty chosen elsewhere, folded in as literals. A ridge penalty for a family that takes none is a conflict. |
+| Invariants | declined. A dialect with nothing to say across siblings omits the interface. |
+
+Three things it shows that the reference dialect cannot.
+
+**A minting rule that is not the default, chosen for a join.** The reason to mint under the pipeline
+hash rather than `canonical-json-sha256-v1` is outside the dialect: a registry already keys fitted
+Compute models by their pipeline hash, and a decision record keyed the same way names the same object
+with the same string. Choose another rule only for a reason like that one. Hold the equality with a
+law test against the other party's own function and its own corpus, because it is the one property
+nothing downstream can check.
+
+**Declared inputs instead of defaults.** Some judgements belong to the deployment: which columns the
+dataset has, and how much history a fit needs. The dialect takes them as a `ComputeDeclaration`
+(`ComputeDialect.declared`) and has no default for either. With a schema, the walk closes and a column
+the fit reads that is not there is refused. With a minimum history, the default gates gain `n`. The
+identity, the payload and the hash do not change with the declaration. The corpus certifies the
+dialect with nothing declared.
+
+**Read the other party's behaviour, not its description.** The plan this dialect was written from
+called rank deficiency a refusal. The pinned Compute fits an aliased design instead: the term stays in
+the coefficients with no estimate, and the summary states the rank. The gate reads that statement.
+The tests run Compute's evaluator to find this out, so a change in how Compute reports it turns them
+red rather than leaving the gate silent.
 
 ## Writing the corpus
 

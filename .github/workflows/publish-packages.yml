@@ -1,6 +1,6 @@
 name: publish-packages
 
-# Pushes the three Fuaran.Modelling packages to nuget.org. Triggered by a tag matching `v*`, the
+# Pushes the four Fuaran.Modelling packages to nuget.org. Triggered by a tag matching `v*`, the
 # release gesture, or by workflow_dispatch against an existing tag. The version packed is the
 # <Version> in Directory.Build.props at the tagged commit, and the tag must name it: a tag that
 # disagrees is refused rather than publishing a number nobody chose.
@@ -72,6 +72,7 @@ jobs:
             'src/Fuaran.Modelling/Fuaran.Modelling.fsproj'
             'src/Fuaran.Modelling.Execution/Fuaran.Modelling.Execution.fsproj'
             'src/Fuaran.Modelling.DialectSeam/Fuaran.Modelling.DialectSeam.fsproj'
+            'src/Fuaran.Modelling.Compute/Fuaran.Modelling.Compute.fsproj'
           )
           foreach ($p in $projects) {
             dotnet pack $p -c Release -o "${{ github.workspace }}/artifacts" --nologo

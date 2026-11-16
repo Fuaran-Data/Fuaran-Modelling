@@ -1,0 +1,291 @@
+{
+  "corpus": "dialect-conformance",
+  "corpusVersion": 1,
+  "dialect": "compute-fit",
+  "gates": [
+    {
+      "direction": "atMost",
+      "name": "rankDeficient",
+      "threshold": 0
+    },
+    {
+      "direction": "atMost",
+      "name": "notConverged",
+      "threshold": 0
+    }
+  ],
+  "importer": [
+    {
+      "name": "clean-document",
+      "residue": [],
+      "roundTrip": true,
+      "source": "[{\"$type\":\"fit\",\"control\":{\"maxIter\":25,\"tol\":1E-08},\"family\":\"gaussian\",\"groupBy\":[],\"intercept\":true,\"link\":\"identity\",\"output\":\"coefficients\",\"predictors\":[{\"expr\":{\"$type\":\"col\",\"name\":\"price\"},\"name\":\"price\"}],\"response\":\"sales\"}]"
+    },
+    {
+      "name": "foreign-document",
+      "residue": [
+        {
+          "path": "/0",
+          "term": "note"
+        },
+        {
+          "path": "/1/control",
+          "term": "budget"
+        },
+        {
+          "path": "/2",
+          "term": "predict"
+        }
+      ],
+      "roundTrip": true,
+      "source": "[{\"$type\":\"derive\",\"name\":\"net_price\",\"expr\":{\"$type\":\"binary\",\"op\":\"sub\",\"left\":{\"$type\":\"col\",\"name\":\"price\"},\"right\":{\"$type\":\"col\",\"name\":\"discount\"}},\"note\":\"prepared upstream\"},{\"$type\":\"fit\",\"response\":\"sales\",\"predictors\":[{\"name\":\"net_price\",\"expr\":{\"$type\":\"col\",\"name\":\"net_price\"}}],\"intercept\":true,\"groupBy\":[],\"family\":\"gaussian\",\"link\":\"identity\",\"control\":{\"maxIter\":25,\"tol\":1e-8,\"budget\":\"wide\"},\"output\":\"coefficients\"},{\"$type\":\"predict\",\"fit\":{\"control\":{\"maxIter\":25,\"tol\":1E-08},\"family\":\"gaussian\",\"groupBy\":[],\"intercept\":true,\"link\":\"identity\",\"output\":\"coefficients\",\"predictors\":[{\"expr\":{\"$type\":\"col\",\"name\":\"net_price\"},\"name\":\"net_price\"}],\"response\":\"sales\"},\"interval\":{\"kind\":\"prediction\",\"level\":0.95},\"model\":{\"from\":\"training\",\"source\":{\"ref\":\"history\",\"schema\":[]}},\"scale\":\"response\"}]"
+    },
+    {
+      "name": "already-canonical",
+      "residue": [],
+      "roundTrip": true,
+      "source": "[{\"$type\":\"derive\",\"expr\":{\"$type\":\"binary\",\"left\":{\"$type\":\"col\",\"name\":\"price\"},\"op\":\"sub\",\"right\":{\"$type\":\"col\",\"name\":\"discount\"}},\"name\":\"net_price\"},{\"$type\":\"fit\",\"control\":{\"maxIter\":25,\"tol\":1E-08},\"family\":\"gaussian\",\"groupBy\":[\"region\"],\"intercept\":true,\"link\":\"identity\",\"offset\":{\"$type\":\"col\",\"name\":\"baseline\"},\"output\":\"summary\",\"predictors\":[{\"expr\":{\"$type\":\"col\",\"name\":\"net_price\"},\"name\":\"net_price\"},{\"expr\":{\"$type\":\"col\",\"name\":\"advertising\"},\"name\":\"advertising\"}],\"response\":\"sales\",\"ridge\":0.5,\"stdErrors\":\"hc1\",\"weights\":\"stores\"}]"
+    }
+  ],
+  "packs": [
+    {
+      "expect": {
+        "$type": "applied",
+        "bytes": "[{\"$type\":\"fit\",\"control\":{\"maxIter\":50,\"tol\":1E-10},\"family\":\"gaussian\",\"groupBy\":[],\"intercept\":true,\"link\":\"identity\",\"output\":\"coefficients\",\"predictors\":[{\"expr\":{\"$type\":\"col\",\"name\":\"price\"},\"name\":\"price\"}],\"response\":\"sales\"}]"
+      },
+      "name": "control-applied",
+      "pack": {
+        "body": "{\"maxIter\":50,\"tol\":1e-10}",
+        "id": "control-1",
+        "kind": "control",
+        "version": "1"
+      },
+      "source": "[{\"$type\":\"fit\",\"control\":{\"maxIter\":25,\"tol\":1E-08},\"family\":\"gaussian\",\"groupBy\":[],\"intercept\":true,\"link\":\"identity\",\"output\":\"coefficients\",\"predictors\":[{\"expr\":{\"$type\":\"col\",\"name\":\"price\"},\"name\":\"price\"}],\"response\":\"sales\"}]"
+    },
+    {
+      "expect": {
+        "$type": "applied",
+        "bytes": "[{\"$type\":\"fit\",\"control\":{\"maxIter\":25,\"tol\":1E-08},\"family\":\"gaussian\",\"groupBy\":[],\"intercept\":true,\"link\":\"identity\",\"output\":\"coefficients\",\"predictors\":[{\"expr\":{\"$type\":\"col\",\"name\":\"price\"},\"name\":\"price\"}],\"response\":\"sales\",\"ridge\":0.25}]"
+      },
+      "name": "ridge-applied",
+      "pack": {
+        "body": "{\"penalty\":0.25}",
+        "id": "ridge-1",
+        "kind": "ridge",
+        "version": "1"
+      },
+      "source": "[{\"$type\":\"fit\",\"control\":{\"maxIter\":25,\"tol\":1E-08},\"family\":\"gaussian\",\"groupBy\":[],\"intercept\":true,\"link\":\"identity\",\"output\":\"coefficients\",\"predictors\":[{\"expr\":{\"$type\":\"col\",\"name\":\"price\"},\"name\":\"price\"}],\"response\":\"sales\"}]"
+    },
+    {
+      "expect": {
+        "$type": "refused",
+        "refusal": "unknownKind"
+      },
+      "name": "undeclared-kind",
+      "pack": {
+        "body": "{}",
+        "id": "priors-1",
+        "kind": "priors",
+        "version": "1"
+      },
+      "source": "[{\"$type\":\"fit\",\"control\":{\"maxIter\":25,\"tol\":1E-08},\"family\":\"gaussian\",\"groupBy\":[],\"intercept\":true,\"link\":\"identity\",\"output\":\"coefficients\",\"predictors\":[{\"expr\":{\"$type\":\"col\",\"name\":\"price\"},\"name\":\"price\"}],\"response\":\"sales\"}]"
+    },
+    {
+      "expect": {
+        "$type": "refused",
+        "refusal": "conflicts"
+      },
+      "name": "ridge-for-a-family-that-takes-none",
+      "pack": {
+        "body": "{\"penalty\":0.25}",
+        "id": "ridge-1",
+        "kind": "ridge",
+        "version": "1"
+      },
+      "source": "[{\"$type\":\"fit\",\"control\":{\"maxIter\":25,\"tol\":1E-08},\"family\":\"poisson\",\"groupBy\":[],\"intercept\":true,\"link\":\"log\",\"output\":\"coefficients\",\"predictors\":[{\"expr\":{\"$type\":\"col\",\"name\":\"price\"},\"name\":\"price\"}],\"response\":\"visits\"}]"
+    },
+    {
+      "expect": {
+        "$type": "refused",
+        "refusal": "malformed"
+      },
+      "name": "control-pack-setting-nothing",
+      "pack": {
+        "body": "{\"budget\":3}",
+        "id": "control-2",
+        "kind": "control",
+        "version": "1"
+      },
+      "source": "[{\"$type\":\"fit\",\"control\":{\"maxIter\":25,\"tol\":1E-08},\"family\":\"gaussian\",\"groupBy\":[],\"intercept\":true,\"link\":\"identity\",\"output\":\"coefficients\",\"predictors\":[{\"expr\":{\"$type\":\"col\",\"name\":\"price\"},\"name\":\"price\"}],\"response\":\"sales\"}]"
+    },
+    {
+      "expect": {
+        "$type": "refused",
+        "refusal": "malformed"
+      },
+      "name": "control-out-of-range",
+      "pack": {
+        "body": "{\"maxIter\":0}",
+        "id": "control-3",
+        "kind": "control",
+        "version": "1"
+      },
+      "source": "[{\"$type\":\"fit\",\"control\":{\"maxIter\":25,\"tol\":1E-08},\"family\":\"gaussian\",\"groupBy\":[],\"intercept\":true,\"link\":\"identity\",\"output\":\"coefficients\",\"predictors\":[{\"expr\":{\"$type\":\"col\",\"name\":\"price\"},\"name\":\"price\"}],\"response\":\"sales\"}]"
+    }
+  ],
+  "projector": [
+    {
+      "bytes": "[{\"$type\":\"fit\",\"control\":{\"maxIter\":25,\"tol\":1E-08},\"family\":\"gaussian\",\"groupBy\":[],\"intercept\":true,\"link\":\"identity\",\"output\":\"coefficients\",\"predictors\":[{\"expr\":{\"$type\":\"col\",\"name\":\"price\"},\"name\":\"price\"}],\"response\":\"sales\"}]",
+      "covers": [
+        "response",
+        "predictor",
+        "intercept",
+        "family",
+        "link",
+        "control",
+        "output"
+      ],
+      "hash": "sha256:57e0819584ca8cab629c8beb3235c17a31e3e9aae101f26675066fbe255d558c",
+      "name": "minimal",
+      "source": "[{\"$type\":\"fit\",\"control\":{\"maxIter\":25,\"tol\":1E-08},\"family\":\"gaussian\",\"groupBy\":[],\"intercept\":true,\"link\":\"identity\",\"output\":\"coefficients\",\"predictors\":[{\"expr\":{\"$type\":\"col\",\"name\":\"price\"},\"name\":\"price\"}],\"response\":\"sales\"}]"
+    },
+    {
+      "bytes": "[{\"$type\":\"fit\",\"control\":{\"maxIter\":25,\"tol\":1E-08},\"family\":\"gaussian\",\"groupBy\":[],\"intercept\":true,\"link\":\"identity\",\"output\":\"coefficients\",\"predictors\":[{\"expr\":{\"$type\":\"col\",\"name\":\"price\"},\"name\":\"price\"}],\"response\":\"sales\"}]",
+      "covers": [
+        "response",
+        "predictor"
+      ],
+      "hash": "sha256:57e0819584ca8cab629c8beb3235c17a31e3e9aae101f26675066fbe255d558c",
+      "name": "authoring-order-permuted",
+      "source": "[ { \"output\" : \"coefficients\", \"response\" : \"sales\", \"$type\" : \"fit\",\u000a          \"predictors\" : [ { \"expr\" : { \"name\" : \"price\", \"$type\" : \"col\" }, \"name\" : \"price\" } ],\u000a          \"link\" : \"identity\", \"intercept\" : true, \"groupBy\" : [ ], \"family\" : \"gaussian\",\u000a          \"control\" : { \"tol\" : 1e-8, \"maxIter\" : 25 } } ]"
+    },
+    {
+      "bytes": "[{\"$type\":\"derive\",\"expr\":{\"$type\":\"binary\",\"left\":{\"$type\":\"col\",\"name\":\"price\"},\"op\":\"sub\",\"right\":{\"$type\":\"col\",\"name\":\"discount\"}},\"name\":\"net_price\"},{\"$type\":\"fit\",\"control\":{\"maxIter\":25,\"tol\":1E-08},\"family\":\"gaussian\",\"groupBy\":[\"region\"],\"intercept\":true,\"link\":\"identity\",\"offset\":{\"$type\":\"col\",\"name\":\"baseline\"},\"output\":\"summary\",\"predictors\":[{\"expr\":{\"$type\":\"col\",\"name\":\"net_price\"},\"name\":\"net_price\"},{\"expr\":{\"$type\":\"col\",\"name\":\"advertising\"},\"name\":\"advertising\"}],\"response\":\"sales\",\"ridge\":0.5,\"stdErrors\":\"hc1\",\"weights\":\"stores\"}]",
+      "covers": [
+        "regressors",
+        "response",
+        "predictor",
+        "groupBy",
+        "weights",
+        "offset",
+        "ridge",
+        "stdErrors",
+        "output"
+      ],
+      "hash": "sha256:81b82a7986ad0e8b25409d171cebecc8cf19739b9e0ea567a17e5ec7981ecc51",
+      "name": "every-optional-member",
+      "source": "[{\"$type\":\"derive\",\"expr\":{\"$type\":\"binary\",\"left\":{\"$type\":\"col\",\"name\":\"price\"},\"op\":\"sub\",\"right\":{\"$type\":\"col\",\"name\":\"discount\"}},\"name\":\"net_price\"},{\"$type\":\"fit\",\"control\":{\"maxIter\":25,\"tol\":1E-08},\"family\":\"gaussian\",\"groupBy\":[\"region\"],\"intercept\":true,\"link\":\"identity\",\"offset\":{\"$type\":\"col\",\"name\":\"baseline\"},\"output\":\"summary\",\"predictors\":[{\"expr\":{\"$type\":\"col\",\"name\":\"net_price\"},\"name\":\"net_price\"},{\"expr\":{\"$type\":\"col\",\"name\":\"advertising\"},\"name\":\"advertising\"}],\"response\":\"sales\",\"ridge\":0.5,\"stdErrors\":\"hc1\",\"weights\":\"stores\"}]"
+    },
+    {
+      "bytes": "[{\"$type\":\"fit\",\"control\":{\"maxIter\":25,\"tol\":1E-08},\"family\":\"poisson\",\"groupBy\":[],\"intercept\":true,\"link\":\"log\",\"output\":\"coefficients\",\"predictors\":[{\"expr\":{\"$type\":\"col\",\"name\":\"price\"},\"name\":\"price\"}],\"response\":\"visits\"}]",
+      "covers": [
+        "family",
+        "link"
+      ],
+      "hash": "sha256:e65c54152e1800312d4cef3999d7032bfcf6d3adb62f4ff2003eb1e60b7912bc",
+      "name": "a-generalised-linear-model",
+      "source": "[{\"$type\":\"fit\",\"control\":{\"maxIter\":25,\"tol\":1E-08},\"family\":\"poisson\",\"groupBy\":[],\"intercept\":true,\"link\":\"log\",\"output\":\"coefficients\",\"predictors\":[{\"expr\":{\"$type\":\"col\",\"name\":\"price\"},\"name\":\"price\"}],\"response\":\"visits\"}]"
+    }
+  ],
+  "seamVersion": "1.1",
+  "validator": [
+    {
+      "findings": [],
+      "name": "clean",
+      "projects": true,
+      "source": "[{\"$type\":\"fit\",\"control\":{\"maxIter\":25,\"tol\":1E-08},\"family\":\"gaussian\",\"groupBy\":[],\"intercept\":true,\"link\":\"identity\",\"output\":\"coefficients\",\"predictors\":[{\"expr\":{\"$type\":\"col\",\"name\":\"price\"},\"name\":\"price\"}],\"response\":\"sales\"}]"
+    },
+    {
+      "findings": [
+        {
+          "code": "CMP-NO-INTERCEPT",
+          "severity": "advisory"
+        }
+      ],
+      "name": "advisory-does-not-block",
+      "projects": true,
+      "source": "[{\"$type\":\"fit\",\"control\":{\"maxIter\":25,\"tol\":1E-08},\"family\":\"gaussian\",\"groupBy\":[],\"intercept\":false,\"link\":\"identity\",\"output\":\"coefficients\",\"predictors\":[{\"expr\":{\"$type\":\"col\",\"name\":\"price\"},\"name\":\"price\"}],\"response\":\"sales\"}]"
+    },
+    {
+      "findings": [
+        {
+          "code": "CMP-NO-DESIGN",
+          "severity": "blocking"
+        }
+      ],
+      "name": "no-design-column",
+      "projects": false,
+      "source": "[{\"$type\":\"fit\",\"control\":{\"maxIter\":25,\"tol\":1E-08},\"family\":\"gaussian\",\"groupBy\":[],\"intercept\":false,\"link\":\"identity\",\"output\":\"coefficients\",\"predictors\":[],\"response\":\"sales\"}]"
+    },
+    {
+      "findings": [
+        {
+          "code": "CMP-RESPONSE-EMPTY",
+          "severity": "blocking"
+        }
+      ],
+      "name": "empty-response",
+      "projects": false,
+      "source": "[{\"$type\":\"fit\",\"control\":{\"maxIter\":25,\"tol\":1E-08},\"family\":\"gaussian\",\"groupBy\":[],\"intercept\":true,\"link\":\"identity\",\"output\":\"coefficients\",\"predictors\":[{\"expr\":{\"$type\":\"col\",\"name\":\"price\"},\"name\":\"price\"}],\"response\":\"\"}]"
+    },
+    {
+      "findings": [
+        {
+          "code": "CMP-PREDICTOR-UNNAMED",
+          "severity": "blocking"
+        }
+      ],
+      "name": "unnamed-predictor",
+      "projects": false,
+      "source": "[{\"$type\":\"fit\",\"control\":{\"maxIter\":25,\"tol\":1E-08},\"family\":\"gaussian\",\"groupBy\":[],\"intercept\":true,\"link\":\"identity\",\"output\":\"coefficients\",\"predictors\":[{\"expr\":{\"$type\":\"col\",\"name\":\"price\"},\"name\":\"\"}],\"response\":\"sales\"}]"
+    },
+    {
+      "findings": [
+        {
+          "code": "CMP-PREDICTOR-DUPLICATE",
+          "severity": "blocking"
+        }
+      ],
+      "name": "a-term-named-twice",
+      "projects": false,
+      "source": "[{\"$type\":\"fit\",\"control\":{\"maxIter\":25,\"tol\":1E-08},\"family\":\"gaussian\",\"groupBy\":[],\"intercept\":true,\"link\":\"identity\",\"output\":\"coefficients\",\"predictors\":[{\"expr\":{\"$type\":\"col\",\"name\":\"price\"},\"name\":\"price\"},{\"expr\":{\"$type\":\"col\",\"name\":\"discount\"},\"name\":\"price\"}],\"response\":\"sales\"}]"
+    },
+    {
+      "findings": [
+        {
+          "code": "CMP-RIDGE-FAMILY",
+          "severity": "blocking"
+        }
+      ],
+      "name": "ridge-under-a-non-gaussian-family",
+      "projects": false,
+      "source": "[{\"$type\":\"fit\",\"control\":{\"maxIter\":25,\"tol\":1E-08},\"family\":\"poisson\",\"groupBy\":[],\"intercept\":true,\"link\":\"log\",\"output\":\"coefficients\",\"predictors\":[{\"expr\":{\"$type\":\"col\",\"name\":\"price\"},\"name\":\"price\"}],\"response\":\"visits\",\"ridge\":1}]"
+    },
+    {
+      "findings": [
+        {
+          "code": "CMP-COLUMN-ABSENT",
+          "severity": "blocking"
+        }
+      ],
+      "name": "a-column-the-walk-proves-absent",
+      "projects": false,
+      "source": "[{\"$type\":\"project\",\"columns\":[{\"a\":\"sales\",\"b\":\"sales\"},{\"a\":\"price\",\"b\":\"price\"}]},{\"$type\":\"fit\",\"control\":{\"maxIter\":25,\"tol\":1E-08},\"family\":\"gaussian\",\"groupBy\":[],\"intercept\":true,\"link\":\"identity\",\"output\":\"coefficients\",\"predictors\":[{\"expr\":{\"$type\":\"col\",\"name\":\"price\"},\"name\":\"price\"},{\"expr\":{\"$type\":\"col\",\"name\":\"advertising\"},\"name\":\"advertising\"}],\"response\":\"sales\"}]"
+    },
+    {
+      "findings": [
+        {
+          "code": "CMP-PREDICTOR-DUPLICATE",
+          "severity": "blocking"
+        },
+        {
+          "code": "CMP-NO-INTERCEPT",
+          "severity": "advisory"
+        }
+      ],
+      "name": "several-findings-at-once",
+      "projects": false,
+      "source": "[{\"$type\":\"fit\",\"control\":{\"maxIter\":25,\"tol\":1E-08},\"family\":\"gaussian\",\"groupBy\":[],\"intercept\":false,\"link\":\"identity\",\"output\":\"coefficients\",\"predictors\":[{\"expr\":{\"$type\":\"col\",\"name\":\"price\"},\"name\":\"price\"},{\"expr\":{\"$type\":\"col\",\"name\":\"price\"},\"name\":\"price\"}],\"response\":\"sales\"}]"
+    }
+  ]
+}

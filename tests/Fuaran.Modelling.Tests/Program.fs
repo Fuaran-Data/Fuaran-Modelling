@@ -8,12 +8,14 @@ open Expecto
 [<EntryPoint>]
 let main argv =
     match List.ofArray argv with
-    // Re-emit the reference dialect's conformance corpus. The committed file is the pin,
-    // and a test compares against it byte for byte — so regenerating is a deliberate act
-    // whose result is reviewed as a diff rather than an expectation that moved by itself.
+    // Re-emit the dialect conformance corpora — the reference dialect's and the Compute
+    // dialect's. The committed files are the pins, and a test compares each against its
+    // emission byte for byte — so regenerating is a deliberate act whose result is reviewed
+    // as a diff rather than an expectation that moved by itself.
     | [ "--emit-corpus" ] ->
-        let path = CorpusFixtures.emit ()
-        printfn "corpus written: %s" path
+        for path in [ CorpusFixtures.emit (); ComputeCorpusFixtures.emit () ] do
+            printfn "corpus written: %s" path
+
         0
     // Emit the cross-host vector file: the generated documents this repository's
     // agreement suite already runs, written out WITH this implementation's canonical

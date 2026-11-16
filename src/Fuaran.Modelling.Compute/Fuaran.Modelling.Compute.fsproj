@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>true</IsPackable>
+    <PackageId>Fuaran.Modelling.Compute</PackageId>
+    <Description>A Fuaran.Modelling dialect whose specification is a Fuaran.Compute fit: the transform pipeline that prepares the regressors, ending in one Fit step. The projector is Compute's canonical pipeline document, so the spec hash IS Compute's pipeline hash (registered as compute-pipeline-sha256-v1) and one model is one object in a decision record and in any registry keyed by that hash. Validators over Compute's own wire and static schema walk, the Fit refusals as default gates, control and ridge packs, and a query handing a re-scorer the composite keys of a declared indistinguishability set. The only package of this repository that depends on Fuaran.Compute.</Description>
+    <PackageTags>modelling;dialect;compute;regression;glm;pipeline;conformance;fsharp</PackageTags>
+    <!-- Closed unions on both sides of the seam; a missing case is a runtime throw in the one
+         place a caller was promised a total answer. -->
+    <WarningsAsErrors>FS0025;$(WarningsAsErrors)</WarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Dialect.fs" />
+    <Compile Include="Multiplicity.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\..\LICENSE" Pack="true" PackagePath="\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Fuaran.Modelling\Fuaran.Modelling.fsproj" />
+    <ProjectReference Include="..\Fuaran.Modelling.DialectSeam\Fuaran.Modelling.DialectSeam.fsproj" />
+    <ProjectReference Include="..\Fuaran.Modelling.Execution\Fuaran.Modelling.Execution.fsproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="FSharp.Core" />
+    <PackageReference Include="Fuaran.Core.Wire" />
+    <!-- Compute enters the repository HERE and nowhere else (DECISIONS D45): a consumer that
+         never fits a Compute model never restores it. -->
+    <PackageReference Include="Fuaran.Compute.DataFrame" />
+    <PackageReference Include="Fuaran.Compute.LinearAlgebra" />
+  </ItemGroup>
+</Project>

@@ -12,7 +12,7 @@ implementations agree or one of them is wrong.
 |---|---|
 | Format | JSON, one document per dialect |
 | Naming | `<dialect-id>.json` |
-| Current | [`reference-linear.json`](reference-linear.json) — the reference dialect's corpus |
+| Current | [`reference-linear.json`](reference-linear.json) — the reference dialect's corpus; [`compute-fit.json`](compute-fit.json) — the Compute dialect's (`Fuaran.Modelling.Compute`) |
 | Harness | `Conformance.parseCorpus` → `Conformance.run` → `Conformance.certify` |
 
 ## Why the fixtures pin observed values
@@ -261,11 +261,16 @@ Run them against your own harness before trusting it to pass yours.
 
 ## Re-emitting
 
-The reference dialect's corpus is generated from the fixture module beside it:
+Both corpora are generated from the fixture modules in the test project (`CorpusFixtures` and
+`ComputeCorpusFixtures`), by one command:
 
 ```
 dotnet run --project tests/Fuaran.Modelling.Tests -- --emit-corpus
 ```
 
-A test compares the committed file against a fresh emission byte for byte, so regeneration is a
+A test compares each committed file against a fresh emission byte for byte, so regeneration is a
 deliberate act whose result is reviewed as a diff.
+
+The Compute dialect's corpus pins the dialect with nothing declared: no source schema and no minimum
+history. A declaration narrows what projects and adds a gate, and its tests run beside the corpus
+rather than in it, because a corpus pins one dialect's behaviour and a declared dialect is another.

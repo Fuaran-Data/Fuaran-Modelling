@@ -380,19 +380,22 @@ fixtures, and fails without them. Check the specification out and name the check
 
 ## Packages
 
-Three packages, versioned together:
+Four packages, versioned together:
 
 | Package | What it carries |
 |---|---|
 | `Fuaran.Modelling` | the manager spine — op vocabulary, path replay, curation, policy, outcome snapshots, forests, the vintage evidence axis, the consensual axis, indistinguishability sets, the contract pack |
 | `Fuaran.Modelling.DialectSeam` | the dialect seam, its conformance corpus, and the reference dialect |
 | `Fuaran.Modelling.Execution` | the execution-backend port, the wire mirror and its codec, the reference executor |
+| `Fuaran.Modelling.Compute` (from 0.8.0) | the Compute dialect: a specification that is a Fuaran.Compute fit, whose spec hash is Compute's pipeline hash, and its conformance corpus |
 
-A consumer takes `Fuaran.Modelling.DialectSeam` to write a dialect; it brings the other two with it.
-`pwsh ./pack-all.ps1` packs all three into a local folder feed for inner-loop consumption
-(`-Feed <path>` to choose one). A release is a `v*` tag: the publish workflow packs all three at the
+A consumer takes `Fuaran.Modelling.DialectSeam` to write a dialect; it brings the manager and the
+execution tier with it. `Fuaran.Modelling.Compute` is the only package that depends on
+Fuaran.Compute, so a consumer that does not take it never restores Compute.
+`pwsh ./pack-all.ps1` packs all four into a local folder feed for inner-loop consumption
+(`-Feed <path>` to choose one). A release is a `v*` tag: the publish workflow packs all four at the
 tagged version and pushes them to nuget.org. Why one version covers
-three packages, and what obliges it to move, is in [`VERSIONING.md`](VERSIONING.md).
+four packages, and what obliges it to move, is in [`VERSIONING.md`](VERSIONING.md).
 
 ## Licence
 

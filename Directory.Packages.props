@@ -4,6 +4,12 @@
          and a pin that names it once cannot leave one of them behind. The version is a tagged,
          published release, so every package here restores from nuget.org and nowhere else. -->
     <FuaranCoreVersion>0.41.0</FuaranCoreVersion>
+    <!-- One property for the Fuaran.Compute.* family, the second producing repository this
+         repository pins (D45). 0.44.0 is the published release carrying the `Fit` verb, and it
+         is built on Fuaran.Core 0.41.0, the line above, so the two families resolve one Core. A
+         raise here moves FuaranCoreVersion to the Core line the new Compute names, in one
+         change. Only Fuaran.Modelling.Compute references these packages. -->
+    <FuaranComputeVersion>0.44.0</FuaranComputeVersion>
   </PropertyGroup>
   <ItemGroup>
     <!-- Fuaran.Modelling is FSharp.Core-only at runtime beyond the Fuaran.Core.* substrate;
@@ -44,5 +50,9 @@
          first ships at 0.37.0, which is why the three pins above moved with it — one version
          for the family. -->
     <PackageVersion Include="Fuaran.Core.Unit" Version="$(FuaranCoreVersion)" />
+    <!-- The Compute dialect's dependencies (D45): the pipeline, its codec and pipeline hash, and
+         the fit's iteration control. -->
+    <PackageVersion Include="Fuaran.Compute.DataFrame" Version="$(FuaranComputeVersion)" />
+    <PackageVersion Include="Fuaran.Compute.LinearAlgebra" Version="$(FuaranComputeVersion)" />
   </ItemGroup>
 </Project>

@@ -39,12 +39,17 @@
     <Compile Include="VintageScenarioTests.fs" />
     <Compile Include="MintingGenerator.fs" />
     <Compile Include="MintingAgreementTests.fs" />
+    <!-- The Compute dialect reuses the reference corpus's repository-root walk and the
+         specification corpus's loader, so it follows both. -->
+    <Compile Include="ComputeCorpusFixtures.fs" />
+    <Compile Include="ComputeDialectTests.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Fuaran.Modelling\Fuaran.Modelling.fsproj" />
     <ProjectReference Include="..\..\src\Fuaran.Modelling.DialectSeam\Fuaran.Modelling.DialectSeam.fsproj" />
     <ProjectReference Include="..\..\src\Fuaran.Modelling.Execution\Fuaran.Modelling.Execution.fsproj" />
+    <ProjectReference Include="..\..\src\Fuaran.Modelling.Compute\Fuaran.Modelling.Compute.fsproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="FSharp.Core" />

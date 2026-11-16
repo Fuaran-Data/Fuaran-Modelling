@@ -123,8 +123,14 @@
          gained a case, no record gained a field and no signature moved. `Registry.mintingAlgorithms`
          gains `compute-pipeline-sha256-v1`, the corpus run recomputes each spec-hash vector under
          the rule its own submission names, and the manifest pin moves to the corpus that carries
-         the new vectors. 0.7.0 is released, so this advances rather than riding it. -->
-    <Version>0.7.1</Version>
+         the new vectors. 0.7.0 is released, so this advances rather than riding it.
+
+         0.8.0 (2026-11-16, a draft): opened ahead of a fourth package, the Compute dialect,
+         and of record and union widenings on the manager tier, each a higher class of change
+         than a patch draft may carry. It carries the 0.7.1 change above, which was never
+         tagged. What each addition is, and what it costs a consumer, is recorded here as it
+         lands. -->
+    <Version>0.8.0</Version>
     <!-- Every package this repository depends on restores from nuget.org (nuget.config), so a pin
          must name a tagged, published version. -->
     <FuaranRestorePath>public</FuaranRestorePath>

@@ -1,0 +1,8 @@
+{
+  "kind": "gateReads",
+  "_": "What this repository's gate reads. The gate is verify.ps1 -> run.ps1: the publication-boundary sweep (gates/check-publication-boundary.ps1), format, build, the Expecto suite. The sweep reads every tracked file, so the record reads `**` and nothing here is gate-inert (DECISIONS D43). That also covers what the suite opens inside this repository (the dialect conformance corpus and the decision log). The model-execution specification's corpus is read from a checkout outside this repository, named by FUARAN_MODEL_EXECUTION_SPEC.",
+  "reads": [
+    "**"
+  ],
+  "notRead": []
+}

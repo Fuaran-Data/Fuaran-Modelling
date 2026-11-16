@@ -157,7 +157,7 @@ module Conformance =
     /// vectors, and re-pin in the same commit. A pin advanced by itself is a snapshot
     /// that has stopped being one.
     let pinnedManifestDigest =
-        "900d1a3c5f5ebd2c2512a02c412202452aac9ad924ff734ea98752a047fc7f7c"
+        "7c15eb590d064f70a399fcd503ce3fb150dc7e8b42d6b5ce8077c8fd77afdf1f"
 
     /// The families this snapshot implements. A manifest naming one that is not here
     /// is a specification that grew a shape the mirror does not model.
@@ -314,11 +314,40 @@ module Conformance =
             else
                 [ fail v.Id ExecutionCodes.roundTripBytes ("expected\n  " + text + "\ngot\n  " + reEncoded) ]
 
+    /// The pipeline hash's identifier (§7.4). The rule is another specification's: it
+    /// digests a pipeline's canonical document, and that specification's corpus is where
+    /// an encoder is certified.
+    let private pipelineHashAlgorithm = "compute-pipeline-sha256-v1"
+
+    /// The bytes a submission's `specHash` is the digest of, under the rule it names.
+    ///
+    /// Under §4.5 that is the canonicalisation of the payload. Under the pipeline hash it
+    /// is the payload itself, because every payload the corpus carries under that rule is
+    /// already the canonical document, imported from the pipeline specification's corpus
+    /// (§9.4). This mirror does not encode a pipeline and does not judge whether a payload
+    /// is one: it checks carriage, which is all these vectors ask.
+    let private intermediateOf (submission: FitSubmission) : Result<string, string> =
+        if submission.SpecHashAlgorithm = Minting.algorithmId then
+            Minting.canonicalise submission.SpecPayload
+            |> Result.mapError Minting.describeRefusal
+        elif submission.SpecHashAlgorithm = pipelineHashAlgorithm then
+            Ok submission.SpecPayload
+        else
+            Error(
+                "no recomputation is defined for a spec-hash vector minted under '"
+                + submission.SpecHashAlgorithm
+                + "'"
+            )
+
     /// A `hash` vector asks a DIFFERENT recomputation depending on its family, and
     /// conflating the two is the most consequential implementation error available:
     /// a `fit-outcome` vector's digest is the composite-key address recomputed from the
     /// document's own key, while a `spec-hash` vector's is the minted `specHash`
     /// recomputed from the document's own payload.
+    ///
+    /// A `spec-hash` vector is recomputed under the rule ITS document names (§7.4), never
+    /// under one assumed for the family: two rules are registered, and they write
+    /// different bytes for the same payload.
     let private checkDigest (v: Vector) (document: Document) : CheckResult list =
         match v.Digest with
         | None -> []
@@ -327,8 +356,7 @@ module Conformance =
                 match v.Family, document with
                 | "fit-outcome", CompositeKeyDoc key -> Ok(Codec.compositeKeyHash key)
                 | "fit-outcome", FitOutcomeDoc outcome -> Ok(Codec.compositeKeyHash outcome.CompositeKey)
-                | "spec-hash", FitSubmissionDoc submission ->
-                    Minting.mint submission.SpecPayload |> Result.mapError Minting.describeRefusal
+                | "spec-hash", FitSubmissionDoc submission -> intermediateOf submission |> Result.map Digest.sha256
                 | family, _ -> Error("no recomputation is defined for a hash vector in family '" + family + "'")
 
             let digestCheck =
@@ -341,14 +369,13 @@ module Conformance =
             let payloadCheck =
                 match v.CanonicalPayload, document with
                 | Some expectedBytes, FitSubmissionDoc submission ->
-                    match Minting.canonicalise submission.SpecPayload with
-                    | Error refusal ->
-                        [ fail v.Id ExecutionCodes.canonicalPayloadDrift (Minting.describeRefusal refusal) ]
+                    match intermediateOf submission with
+                    | Error detail -> [ fail v.Id ExecutionCodes.canonicalPayloadDrift detail ]
                     | Ok actual when actual = expectedBytes ->
                         [ pass
                               v.Id
                               ExecutionCodes.canonicalPayloadDrift
-                              "the §4.5 intermediate equals the one the corpus pins" ]
+                              "the intermediate equals the one the corpus pins" ]
                     | Ok actual ->
                         [ fail
                               v.Id

@@ -43,15 +43,19 @@ open Fuaran.Modelling.Execution
 let private seamMint (payload: string) : string =
     Fuaran.Modelling.DialectSeam.ReferenceDialect.dialect.Mint payload
 
-let private specHashVectors () =
-    (SpecCorpus.manifest ()).Vectors
-    |> List.filter (fun v -> v.Family = "spec-hash")
-
 let private payloadOf (v: Vector) : FitSubmission =
     match Codec.read (SpecCorpus.load v) with
     | Ok(FitSubmissionDoc s) -> s
     | Ok other -> failtestf "%s is a %s, not a fit submission" v.Id (Document.kindOf other)
     | Error refusal -> failtestf "%s does not read: %s" v.Id refusal.Detail
+
+/// The family's vectors minted under the rule THIS gate checks. The family also carries
+/// vectors under the other registered rule (§7.4), which neither tier here implements;
+/// the corpus run recomputes those, and the corpus tests assert that it did.
+let private specHashVectors () =
+    (SpecCorpus.manifest ()).Vectors
+    |> List.filter (fun v -> v.Family = "spec-hash")
+    |> List.filter (fun v -> (payloadOf v).SpecHashAlgorithm = Minting.algorithmId)
 
 [<Tests>]
 let agreementTests =

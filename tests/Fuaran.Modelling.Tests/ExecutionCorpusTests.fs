@@ -73,6 +73,38 @@ let corpusTests =
                   Expect.isTrue r.Passed (r.Code + " @ " + r.Vector + ": " + r.Detail)
           }
 
+          test "the spec-hash family is recomputed under each registered minting rule" {
+              // Two rules are registered (§7.4) and the family carries vectors under both.
+              // A harness that assumed one rule for the family would fail the other's
+              // vectors; one that skipped them would pass by doing nothing, so the count
+              // under each is asserted, and each is asserted to have been recomputed.
+              let m = SpecCorpus.manifest ()
+
+              let algorithmOf (v: Vector) =
+                  match Codec.read (SpecCorpus.load v) with
+                  | Ok(FitSubmissionDoc s) -> s.SpecHashAlgorithm
+                  | _ -> failtestf "%s is not a fit submission" v.Id
+
+              let hashVectors =
+                  m.Vectors |> List.filter (fun v -> v.Family = "spec-hash" && v.Kind = "hash")
+
+              let byAlgorithm = hashVectors |> List.countBy algorithmOf |> Map.ofList
+
+              Expect.equal
+                  (byAlgorithm |> Map.toList |> List.map fst |> List.sort)
+                  (List.sort Registry.mintingAlgorithms)
+                  "the family carries vectors under exactly the registered rules"
+
+              let recomputed =
+                  results ()
+                  |> List.filter (fun r -> r.Code = ExecutionCodes.digestDrift && r.Passed)
+                  |> List.map (fun r -> r.Vector)
+                  |> Set.ofList
+
+              for v in hashVectors do
+                  Expect.isTrue (recomputed.Contains v.Id) (v.Id + ": its minted hash was recomputed and matched")
+          }
+
           test "the number of vectors executed equals the number the manifest enumerates" {
               // §9.3 asks this of a harness rather than of an emitter, because a
               // conformance suite is exactly the kind of code that passes by doing

@@ -1053,3 +1053,33 @@ were tagged in that earlier history and were never published to a registry.
 The specification's corpus is reached through `FUARAN_MODEL_EXECUTION_SPEC` for the same reason:
 a relative path to a neighbouring checkout assumes a layout nothing here enforces, so the layout
 is the fallback and the variable is the interface.
+
+## D44 — The mirror reads a minting rule from the submission, and digests a pipeline it does not encode
+
+The model-execution specification registers a second `specHashAlgorithm`,
+`compute-pipeline-sha256-v1`: the hash of a Compute pipeline's canonical document, defined by the
+Compute pipeline wire specification and registered in the execution specification by citation. Its
+`spec-hash` family now carries vectors under both rules.
+
+Until then the family had one rule, and the mirror's corpus run recomputed every vector under it.
+That was an assumption about the family rather than a reading of the vector, and a second rule
+makes it wrong in a way that looks like a failed vector. So the run now reads the rule from each
+submission's own `specHashAlgorithm`, and a vector under a rule the run has no recomputation for
+fails by name instead of being run under another.
+
+**The pipeline hash is digested here, not encoded.** Every payload the corpus carries under that
+rule is one of the pipeline specification's canonical documents, imported byte for byte, so the
+recomputation is the SHA-256 of the payload's bytes and the intermediate is the payload. The mirror
+tier stays what D22 made it — `FSharp.Core` and the BCL — and takes no pipeline format. Whether a
+payload is a canonical pipeline is certified against that specification's corpus by whoever encodes
+one; what this run certifies is carriage.
+
+**`Submitter.checkMinting` is unchanged, on purpose.** It checks a submission's hash against the
+rule this library implements and passes one that names another. The pipeline hash stays in the
+second class: a pre-emit check that digested the payload's bytes would accept any payload that was
+not canonical, which is the one thing a pre-emit check exists to catch. A dialect that mints
+pipeline hashes owns that check, with an encoder behind it.
+
+`Registry.mintingAlgorithms` gains the identifier, and the manifest pin moves to the corpus that
+carries the new vectors. No type gained a case, no record gained a field and no signature moved,
+so this is a patch: 0.7.1, a draft, because 0.7.0 is released (`VERSIONING.md`).

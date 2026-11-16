@@ -63,8 +63,10 @@ module Registry =
     /// §7.4 — content-address algorithms registered at version 1.
     let digestAlgorithms = [ "sha256" ]
 
-    /// §7.4 — `specHashAlgorithm` values registered at version 1.
-    let mintingAlgorithms = [ "canonical-json-sha256-v1" ]
+    /// §7.4 — `specHashAlgorithm` values registered at version 1: the minting
+    /// canonicalisation of §4.5, and the pipeline hash, which another specification
+    /// defines and §7.4 registers by citation.
+    let mintingAlgorithms = [ "canonical-json-sha256-v1"; "compute-pipeline-sha256-v1" ]
 
     /// §7.7 — outcome lifecycle statuses registered at version 1.
     let outcomeStatuses = [ "registered"; "accepted"; "approved"; "retired"; "failed" ]

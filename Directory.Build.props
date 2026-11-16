@@ -112,10 +112,10 @@
          pins assert. The seam tag is unchanged at 1.1: a unit is a value attached to a name
          a dialect already chose, and nothing new is asked of a dialect.
 
-         0.7.0 is untagged and no published consumer pins it, so it is still a draft, and the
+         0.7.0 was untagged and no published consumer pinned it, so it was still a draft, and the
          Fuaran.Core pins moving 0.37.0 -> 0.41.0 (DECISIONS D41) ride it rather than advance it:
          no type gained a case, no record gained a field, no signature moved and no stored byte
-         changes. What moves is the packed dependency floor, which the first tagged release states
+         changes. What moved is the packed dependency floor, which the first tagged release states
          once. -->
     <Version>0.7.0</Version>
     <!-- Every package this repository depends on restores from nuget.org (nuget.config), so a pin

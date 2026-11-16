@@ -391,7 +391,7 @@ Three packages, versioned together:
 A consumer takes `Fuaran.Modelling.DialectSeam` to write a dialect; it brings the other two with it.
 `pwsh ./pack-all.ps1` packs all three into a local folder feed for inner-loop consumption
 (`-Feed <path>` to choose one). A release is a `v*` tag: the publish workflow packs all three at the
-tagged version and pushes them to nuget.org. No version is published yet. Why one version covers
+tagged version and pushes them to nuget.org. Why one version covers
 three packages, and what obliges it to move, is in [`VERSIONING.md`](VERSIONING.md).
 
 ## Licence

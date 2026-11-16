@@ -112,7 +112,7 @@ The same draft carries the step D39 left open ([D40](DECISIONS.md#d40--a-metric-
 a margin states its unit, and the vintage axis and indistinguishability compare a metric only in it.
 It is the same class of change — fields on `CorrectionThresholds`, `IndistinguishabilityDeclaration`,
 `VintageSeries` and `DecisionRecord`, and a case on `IndistinguishabilityReport` — so it rides 0.7.0,
-which is not yet tagged, rather than advancing it. Every wire addition is omitted when it carries
+which was not yet tagged, rather than advancing it. Every wire addition is omitted when it carries
 nothing, so a record with no units still encodes to the bytes 0.6.0 wrote.
 
 The same release moved the `Fuaran.Core` pins from 0.20.0 to 0.37.0, because the unit algebra first
